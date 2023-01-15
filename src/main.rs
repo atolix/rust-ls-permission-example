@@ -7,7 +7,7 @@ fn main() {
     for entry in fs::read_dir(current_dir).unwrap() {
         let entry = entry.unwrap();
         let file_name = entry.file_name();
-        let metadata = fs::metadata(entry.path()).unwrap();
+        let metadata = fs::metadata(entry.path().as_path()).unwrap();
         let permissions = metadata.permissions().mode();
         let rwx = convert_octal_to_rwx(permissions);
         println!("{:?} {:?}", rwx, file_name.to_string_lossy());
@@ -22,13 +22,13 @@ fn convert_octal_to_rwx(mode: u32) -> String {
 }
 
 fn to_rwx(permission: u32) -> String {
-    let is_readable = permission / 4;
-    let is_writable = (permission % 4) / 2;
-    let is_executable = (permission % 4) % 2;
+    let is_readable = (permission / 4) > 0;
+    let is_writable = ((permission % 4) / 2) > 0;
+    let is_executable = ((permission % 4) % 2) > 0;
     format!(
         "{}{}{}",
-        if is_readable >= 1 { "r" } else { "-" },
-        if is_writable >= 1 { "w" } else { "-" },
-        if is_executable >= 1 { "x" } else { "-" }
+        if is_readable { "r" } else { "-" },
+        if is_writable { "w" } else { "-" },
+        if is_executable { "x" } else { "-" }
     )
 }
