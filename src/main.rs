@@ -15,15 +15,20 @@ fn main() {
 }
 
 fn convert_octal_to_rwx(mode: u32) -> String {
-    let mut permissions = String::new();
-    permissions.push(if mode & 0o400 != 0 { 'r' } else { '-' });
-    permissions.push(if mode & 0o200 != 0 { 'w' } else { '-' });
-    permissions.push(if mode & 0o100 != 0 { 'x' } else { '-' });
-    permissions.push(if mode & 0o040 != 0 { 'r' } else { '-' });
-    permissions.push(if mode & 0o020 != 0 { 'w' } else { '-' });
-    permissions.push(if mode & 0o010 != 0 { 'x' } else { '-' });
-    permissions.push(if mode & 0o004 != 0 { 'r' } else { '-' });
-    permissions.push(if mode & 0o002 != 0 { 'w' } else { '-' });
-    permissions.push(if mode & 0o001 != 0 { 'x' } else { '-' });
-    permissions
+    let user = (mode / 64) % 8;
+    let group = (mode / 8) % 8;
+    let others = mode % 8;
+    format!("{}{}{}", to_rwx(user), to_rwx(group), to_rwx(others))
+}
+
+fn to_rwx(permission: u32) -> String {
+    let is_readable = permission / 4;
+    let is_writable = (permission % 4) / 2;
+    let is_executable = (permission % 4) % 2;
+    format!(
+        "{}{}{}",
+        if is_readable >= 1 { "r" } else { "-" },
+        if is_writable >= 1 { "w" } else { "-" },
+        if is_executable >= 1 { "x" } else { "-" }
+    )
 }
